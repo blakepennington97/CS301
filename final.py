@@ -15,7 +15,7 @@ def readParse():
         formatted_segment = (f'A: {ID} ' + line.strip('\n ')).split(' ')
         for i in range(len(formatted_segment)):
             if (i < len(formatted_segment) and (i % 2 == 0)):
-                temp_dict[formatted_segment[i]] = formatted_segment[i+1]
+                temp_dict[formatted_segment[i].strip(':')] = formatted_segment[i+1]
         data.append(temp_dict)
         ID+=1
 
@@ -29,8 +29,8 @@ def processQueries(data):
     processing_find = False
     queries = []
     conditions = []
-    projections = []
-    count = 0
+    projections = ''
+    count = 1
     f = open("final.txt", "r")
 
     for line in f:
@@ -47,7 +47,7 @@ def processQueries(data):
                 conditions.append(i)
             # now get projections
             else:
-                projections.append(i.strip(' ;'))
+                projections = i.strip(' ;')
                 find(data, count, conditions, projections)
                 processing_find = False
                 count+=1
@@ -55,12 +55,24 @@ def processQueries(data):
 
 def find (data, count, conditions, projections):
     print(f"Query {count}")
-    # if no conditions
+    # no conditions
     if 'Y' in conditions:
-        # if no projections
+        # no projections, so print all
         if 'Z' in projections:
             for i in data:
-                print(i)
+                for k, v in i.items():
+                    print(k, v, sep=': ', end=' ')
+                print()
+        # get projections
+        else:
+            projections_list = projections.split(' ')
+            for i in data:
+                for k, v in i.items():
+                    if k in projections_list:
+                        print(k, v, sep=': ', end=' ')
+                print()
+    #elif '=' in conditions:
+
 
 
 
