@@ -57,12 +57,14 @@ def find (data, count, conditions, projections):
     print(f"Query {count}")
     # no conditions
     if 'Y' in conditions:
+
         # no projections, so print all
         if 'Z' in projections:
             for i in data:
                 for k, v in i.items():
                     print(k, v, sep=': ', end=' ')
                 print()
+
         # get projections
         else:
             projections_list = projections.split(' ')
@@ -71,8 +73,47 @@ def find (data, count, conditions, projections):
                     if k in projections_list:
                         print(k, v, sep=': ', end=' ')
                 print()
-    #elif '=' in conditions:
 
+    # get conditions
+    else:
+        temp_data = data
+        key_for_condition = ''
+        value_for_condition = ''
+        remove_list = []
+
+        for i in conditions:
+            if '=' in i:
+                segment = i.split(' = ')
+                key_for_condition = segment[0]
+                value_for_condition = segment[1]
+            for j in range(len(temp_data)):
+                temp = temp_data[j].pop(key_for_condition, '')
+                if (temp == value_for_condition):
+                    # keep the line because key was found
+                    continue
+                else:
+                    remove_list.append(temp_data[j])
+
+        # remove all non-matches from temp_data
+        for i in remove_list:
+            temp_data.remove(i)
+        
+        # no projections, so print all
+        if 'Z' in projections:
+            for i in data:
+                for k, v in i.items():
+                    print(k, v, sep=': ', end=' ')
+                print()
+
+        # get projections
+        else:
+            projections_list = projections.split(' ')
+            for i in data:
+                for k, v in i.items():
+                    if k in projections_list:
+                        print(k, v, sep=': ', end=' ')
+                print()
+                
 
 
 
