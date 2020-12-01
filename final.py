@@ -5,29 +5,23 @@ from pprint import pprint
 
 # read the input file data.txt and parse it into a data structure
 def readParse():
-    data = {}
     data = []
     ID = 0
     f = open("data.txt", 'r')
 
     # append in each line in input with a unique ID field 'A'
     for line in f:
-        data.append(f"A: {ID} " + line.strip('\n '))
+        temp_dict = {}
+        formatted_segment = (f'A: {ID} ' + line.strip('\n ')).split(' ')
+        for i in range(len(formatted_segment)):
+            if (i < len(formatted_segment) and (i % 2 == 0)):
+                temp_dict[formatted_segment[i]] = formatted_segment[i+1]
+        data.append(temp_dict)
         ID+=1
 
     
-    #pprint(temp)
+    pprint(data)
     return data
-
-
-def find (data, count, conditions, projections):
-    print(f"Query {count}")
-    # if no conditions
-    if 'Y' in conditions:
-        # if no projections
-        if 'Z' in projections:
-            for i in data:
-                print(i)
 
 
 # process queries from final.txt in combination with the data gathered
@@ -58,6 +52,15 @@ def processQueries(data):
                 processing_find = False
                 count+=1
 
+
+def find (data, count, conditions, projections):
+    print(f"Query {count}")
+    # if no conditions
+    if 'Y' in conditions:
+        # if no projections
+        if 'Z' in projections:
+            for i in data:
+                print(i)
 
 
 
