@@ -1,9 +1,11 @@
+# Author: Blake Pennington
 
-# REQUIRES PYTHON 3.6.9 or greater
-from pprint import pprint
+#----------------------------------#
+# REQUIRES PYTHON 3.6.9 or greater #
+#----------------------------------#
 
 
-# read the input file data.txt and parse it into a data structure
+# read the input file data.txt and parse it into a dict
 def readParse():
     data = []
     ID = 1
@@ -19,8 +21,6 @@ def readParse():
         data.append(temp_dict)
         ID+=1
 
-    
-    #pprint(data)
     return data
 
 
@@ -28,6 +28,7 @@ def readParse():
 def processQueries(data):
     processing_find = False
     processing_sort = False
+    processing_error = False
     queries = []
     conditions = []
     projections = ''
@@ -36,19 +37,24 @@ def processQueries(data):
     order = ''
     f = open("final.txt", "r")
 
+    # grab queries and store in queries list
     for line in f:
         queries.append(line.strip('\n '))
 
+    # iterate through lines in queries
     for i in queries:
+        # if FIND found, set flag to true so can do appropriate action on following query lines
         if (i == 'FIND' and processing_find == False):
             processing_find = True
+            processing_error = False
+        # if FIND query lines
         elif (processing_find):
-            # get conditions
+            # get conditions list
             if 'Y' in i:
                 conditions.append(i)
             elif (any(cond in i for cond in ('=', '<', '>'))):
                 conditions.append(i)
-            # now get projections
+            # now get projections string and send to find() function with appropriate query attributes
             else:
                 projections = i.strip(' ;')
                 find(data, count, conditions, projections)
@@ -56,21 +62,29 @@ def processQueries(data):
                 projections = ''
                 processing_find = False
                 count+=1
+        # if SORT found, set flag to true so can do appropriate action on following query lines
         elif (i == 'SORT' and processing_sort == False):
             processing_sort = True
+            processing_error = False
+        # if SORT query lines
         elif (processing_sort):
             if '1' in i or '-1' in i:
+                # now send to sort() function with appropriate query attributes
                 key = i.split(' = ')[0]
                 order = i.split(' = ')[1].strip('; ')
-                sort(data, key, order)
+                sort(data, count, key, order)
                 processing_sort = False
                 key = ''
                 order = ''
-        else:
-            exit('ERROR IN QUERIES: NO FIND OR SORT FOUND')
+                count+=1
+        # if query is NOT FIND or SORT, print error and set flag to process garbage
+        elif(not processing_error):
+            print('QUERY ERROR: NO FIND OR SORT FOUND')
+            processing_error = True
 
 
-def sort(data, key, order):
+# sorts db based on key attribute in ascending or descending order
+def sort(data, count, key, order):
     temp_data = data.copy()
     sorted_data = []
     remove_list = []
@@ -80,8 +94,6 @@ def sort(data, key, order):
         pass
     else:
         return
-
-
 
     # remove documents that DO NOT have the sort field
     for j in range(len(temp_data)):
@@ -95,16 +107,18 @@ def sort(data, key, order):
     for x in remove_list:
         temp_data.remove(x)
 
+    # sort the data in either ascending/descending order based on key and order parameter
     sorted_data = bubbleSort(temp_data, key, order)
 
-    print()
+    # print sorted data structure
+    print(f'Query {count}')
     for i in temp_data:
         for k, v in i.items():
             print(k, v, sep=': ', end=' ')
         print()
-    #print()
                 
 
+# helper function for sort() that sorts the data appropriately based on given parameters
 def bubbleSort(data, key, order):
     size = len(data)
     for i in range(size - 1):
@@ -122,20 +136,20 @@ def bubbleSort(data, key, order):
 
     return data
 
+
+# finds and prints documents in db that meet the wanted criteria for the query
 def find (data, count, conditions, projections):
-    # no conditions
+    # query has no conditions
     if 'Y' in conditions:
         # no projections, so print all
-        if 'Z' in projections:
+        if 'Z' == projections:
             print(f"Query {count}")
             for i in data:
                 for k, v in i.items():
                     print(k, v, sep=': ', end=' ')
                 print()
-
         # get projections
         else:
-
             projections_list = projections.split(' ')
 
             # check if projection key even exists in db
@@ -145,24 +159,24 @@ def find (data, count, conditions, projections):
                 else:
                     return
 
+            # print documents based on the given key(s)
             print(f"Query {count}")
-
             for i in data:
                 for k, v in i.items():
                     if k in projections_list:
                         print(k, v, sep=': ', end=' ')
                 print()
 
-    # get conditions
+    # query has conditions, so process them
     else:
         temp_data = data.copy()
         key_for_condition = ''
         value_for_condition = ''
         remove_list = []
 
+        # loop through conditions and apply appropriate actions
         for i in conditions:
-
-            # check if condition key even exists in db
+            # first check if condition key even exists in db
             if (any(i.split(' ')[0] in d for d in data)):
                 pass
             else:
@@ -172,12 +186,14 @@ def find (data, count, conditions, projections):
             for x in remove_list:
                 temp_data.remove(x)
             remove_list.clear()
+            # if comparison operator is =
             if '=' in i:
+                # split condition into key and value variables
                 segment = i.split(' = ')
                 key_for_condition = segment[0]
                 value_for_condition = segment[1]
+                # loop through db and gather documents that will be kept or removed
                 for j in range(len(temp_data)):
-                    #temp = temp_data[j].pop(key_for_condition, '')
                     if key_for_condition in temp_data[j]:
                         if (temp_data[j][key_for_condition] == value_for_condition):
                             # keep the line because key was found
@@ -186,12 +202,14 @@ def find (data, count, conditions, projections):
                             remove_list.append(temp_data[j])
                     else:
                         remove_list.append(temp_data[j])
+            # if comparison operator is >
             elif '>' in i:
+                # split condition into key and value variables
                 segment = i.split(' > ')
                 key_for_condition = segment[0]
                 value_for_condition = segment[1]
+                # loop through db and gather documents that will be kept or removed
                 for j in range(len(temp_data)):
-                    #temp = temp_data[j].pop(key_for_condition, '')
                     if key_for_condition in temp_data[j]:
                         if (temp_data[j][key_for_condition] > value_for_condition):
                             # keep the line because key was found
@@ -200,12 +218,14 @@ def find (data, count, conditions, projections):
                             remove_list.append(temp_data[j])
                     else:
                         remove_list.append(temp_data[j])
+            # if comparison operator is <
             elif '<' in i:
+                # split condition into key and value variables
                 segment = i.split(' < ')
                 key_for_condition = segment[0]
                 value_for_condition = segment[1]
+                # loop through db and gather documents that will be kept or removed
                 for j in range(len(temp_data)):
-                    #temp = temp_data[j].pop(key_for_condition, '')
                     if key_for_condition in temp_data[j]:
                         if (temp_data[j][key_for_condition] < value_for_condition):
                             # keep the line because key was found
@@ -214,20 +234,30 @@ def find (data, count, conditions, projections):
                             remove_list.append(temp_data[j])
                     else:
                         remove_list.append(temp_data[j])
-                    
+
+        # remove documents that do not match the condition    
         for x in remove_list:
             temp_data.remove(x)
 
         # no projections, so print all
-        if 'Z' in projections:
+        if 'Z' == projections:
             print(f"Query {count}")
             for i in temp_data:
                 for k, v in i.items():
                     print(k, v, sep=': ', end=' ')
                 print()
 
-        # get projections
+        # projections exist, so process projections
         else:
+            projections_list = projections.split(' ')
+            # check if projection key even exists in db
+            for i in projections_list:
+                if (any(i in d for d in data)):
+                    break
+                else:
+                    return
+
+            # print processed db
             print(f"Query {count}")
             projections_list = projections.split(' ')
             for i in temp_data:

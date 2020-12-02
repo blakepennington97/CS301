@@ -1,3 +1,35 @@
 FIND
+M = 555
+C H ;
+FIND
+H = 20
+M = 555
+Z ;
+FIND
+Y
+Z ;
+FIND
+T = 6
+U ;
+FIND
+M = 555
+X ;
+FIND
+M = 555
+C H X ;
+SORT
+A = -1 ;
+SORT
+A = 1 ;
+SORT
+C = -1 ;
+SORT
+V = 1 ;
+SORT
+X = 1 ;
+DELETE
+Y
+Z ;
+FIND
 Y
 Z ;
