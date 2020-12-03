@@ -160,12 +160,16 @@ def find (data, count, conditions, projections):
                     return
 
             # print documents based on the given key(s)
+            format_flag = False
             print(f"Query {count}")
             for i in data:
                 for k, v in i.items():
                     if k in projections_list:
                         print(k, v, sep=': ', end=' ')
-                print()
+                        format_flag = True
+                if (format_flag):
+                    print()
+                    format_flag = False
 
     # query has conditions, so process them
     else:
