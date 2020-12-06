@@ -79,12 +79,16 @@ def processQueries(data):
                 count+=1
         # if query is NOT FIND or SORT, print error and set flag to process garbage
         elif(not processing_error):
-            print('QUERY ERROR: NO FIND OR SORT FOUND')
             processing_error = True
+        elif(processing_error and ';' in i):
+            print(f'\nQuery {count}')
+            count+=1
+            print('QUERY ERROR: NO FIND OR SORT FOUND')
 
 
 # sorts db based on key attribute in ascending or descending order
 def sort(data, count, key, order):
+    print(f'\nQuery {count}')
     temp_data = data.copy()
     sorted_data = []
     remove_list = []
@@ -111,7 +115,6 @@ def sort(data, count, key, order):
     sorted_data = bubbleSort(temp_data, key, order)
 
     # print sorted data structure
-    print(f'Query {count}')
     for i in temp_data:
         for k, v in i.items():
             print(k, v, sep=': ', end=' ')
@@ -124,12 +127,12 @@ def bubbleSort(data, key, order):
     for i in range(size - 1):
         for j in range(0, size-i-1):
             if order == '-1':
-                if data[j][key] < data[j+1][key]:
+                if int(data[j][key]) < int(data[j+1][key]):
                     temp = data[j]
                     data[j] = data[j+1]
                     data[j+1] = temp
             elif order == '1':
-                if data[j][key] > data[j+1][key]:
+                if int(data[j][key]) > int(data[j+1][key]):
                     temp = data[j]
                     data[j] = data[j+1]
                     data[j+1] = temp
@@ -140,10 +143,10 @@ def bubbleSort(data, key, order):
 # finds and prints documents in db that meet the wanted criteria for the query
 def find (data, count, conditions, projections):
     # query has no conditions
+    print(f"\nQuery {count}")
     if 'Y' in conditions:
         # no projections, so print all
         if 'Z' == projections:
-            print(f"Query {count}")
             for i in data:
                 for k, v in i.items():
                     print(k, v, sep=': ', end=' ')
@@ -161,7 +164,6 @@ def find (data, count, conditions, projections):
 
             # print documents based on the given key(s)
             format_flag = False
-            print(f"Query {count}")
             for i in data:
                 for k, v in i.items():
                     if k in projections_list:
@@ -245,7 +247,6 @@ def find (data, count, conditions, projections):
 
         # no projections, so print all
         if 'Z' == projections:
-            print(f"Query {count}")
             for i in temp_data:
                 for k, v in i.items():
                     print(k, v, sep=': ', end=' ')
@@ -262,7 +263,6 @@ def find (data, count, conditions, projections):
                     return
 
             # print processed db
-            print(f"Query {count}")
             projections_list = projections.split(' ')
             for i in temp_data:
                 for k, v in i.items():
